@@ -166,7 +166,7 @@ grad = finite_difference_gradient(g, t, Val(:central), eltype(t), Val(false))
 - Complex step: `O(n)` function evaluations, machine precision accuracy
 """
 function finite_difference_gradient(
-        f,
+        f::FN0,
         x,
         fdtype = Val(:central),
         returntype = eltype(x),
@@ -176,7 +176,7 @@ function finite_difference_gradient(
         c2 = nothing;
         relstep = default_relstep(fdtype, eltype(x)),
         absstep = relstep,
-        dir = true)
+        dir = true) where {FN0}
     inplace isa Type && (inplace = inplace())
     if typeof(x) <: AbstractArray
         df = zero(returntype) .* x
@@ -219,7 +219,7 @@ Cache-less.
 """
 function finite_difference_gradient!(
         df,
-        f,
+        f::FN0,
         x,
         fdtype = Val(:central),
         returntype = eltype(df),
@@ -228,7 +228,7 @@ function finite_difference_gradient!(
         c1 = nothing,
         c2 = nothing;
         relstep = default_relstep(fdtype, eltype(x)),
-        absstep = relstep)
+        absstep = relstep) where {FN0}
     cache = GradientCache(df, x, fdtype, returntype, inplace)
     finite_difference_gradient!(df, f, x, cache, relstep = relstep, absstep = absstep)
 end
@@ -248,12 +248,12 @@ Gradients are either a vector->scalar map `f(x)`, or a scalar->vector map `f(fx,
 Cached.
 """
 function finite_difference_gradient(
-        f,
+        f::FN0,
         x,
         cache::GradientCache{T1, T2, T3, T4, fdtype, returntype, inplace};
         relstep = default_relstep(fdtype, eltype(x)),
         absstep = relstep,
-        dir = true) where {T1, T2, T3, T4, fdtype, returntype, inplace}
+        dir = true) where {FN0,T1, T2, T3, T4, fdtype, returntype, inplace}
     if typeof(x) <: AbstractArray
         df = zero(returntype) .* x
         finite_difference_gradient!(
@@ -302,12 +302,12 @@ end
 # this ignores the value of "inplace", because it doesn't make much sense
 function finite_difference_gradient!(
         df,
-        f,
+        f::FN0,
         x,
         cache::GradientCache{T1, T2, T3, T4, fdtype, returntype, inplace};
         relstep = default_relstep(fdtype, eltype(x)),
         absstep = relstep,
-        dir = true) where {T1, T2, T3, T4, fdtype, returntype, inplace}
+        dir = true) where {FN0,T1, T2, T3, T4, fdtype, returntype, inplace}
 
     # NOTE: in this case epsilon is a vector, we need two arrays for epsilon and x1
     # c1 denotes x1, c2 is epsilon
@@ -389,12 +389,12 @@ end
 
 function finite_difference_gradient!(
         df::StridedVector{<:Number},
-        f,
+        f::FN0,
         x::StridedVector{<:Number},
         cache::GradientCache{T1, T2, T3, T4, fdtype, returntype, inplace};
         relstep = default_relstep(fdtype, eltype(x)),
         absstep = relstep,
-        dir = true) where {T1, T2, T3, T4, fdtype, returntype, inplace}
+        dir = true) where {FN0,T1, T2, T3, T4, fdtype, returntype, inplace}
 
     # c1 is x1 if we need a complex copy of x, otherwise Nothing
     # c2 is Nothing
@@ -476,12 +476,12 @@ end
 # this is effectively a vector of partial derivatives, but we still call it a gradient
 function finite_difference_gradient!(
         df,
-        f,
+        f::FN0,
         x::Number,
         cache::GradientCache{T1, T2, T3, T4, fdtype, returntype, inplace};
         relstep = default_relstep(fdtype, eltype(x)),
         absstep = relstep,
-        dir = true) where {T1, T2, T3, T4, fdtype, returntype, inplace}
+        dir = true) where {FN0,T1, T2, T3, T4, fdtype, returntype, inplace}
 
     # NOTE: in this case epsilon is a scalar, we need two arrays for fx1 and fx2
     # c1 denotes fx1, c2 is fx2, sizes guaranteed by the cache constructor

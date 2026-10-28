@@ -137,11 +137,11 @@ where `eᵢ` is the i-th unit vector and `hᵢ` is the step size in dimension i.
 - The result is automatically symmetrized using `Symmetric()` wrapper
 - For large problems, consider using `finite_difference_gradient` twice instead
 """
-function finite_difference_hessian(f, x,
+function finite_difference_hessian(f::FN0, x,
         fdtype = Val(:hcentral),
         inplace = _hessian_inplace(x);
         relstep = default_relstep(fdtype, eltype(x)),
-        absstep = relstep)
+        absstep = relstep) where {FN0}
     cache = HessianCache(x, fdtype, inplace)
     finite_difference_hessian(f, x, cache; relstep = relstep, absstep = absstep)
 end
@@ -157,10 +157,10 @@ end
 Cached.
 """
 function finite_difference_hessian(
-        f, x,
+        f::FN0, x,
         cache::HessianCache{T, fdtype, inplace};
         relstep = default_relstep(fdtype, eltype(x)),
-        absstep = relstep) where {T, fdtype, inplace}
+        absstep = relstep) where {FN0,T, fdtype, inplace}
     H = mutable_zeromatrix(x)
     finite_difference_hessian!(H, f, x, cache; relstep = relstep, absstep = absstep)
     __Symmetric(H)
@@ -178,12 +178,12 @@ end
 
 Cache-less.
 """
-function finite_difference_hessian!(H, f,
+function finite_difference_hessian!(H, f::FN0,
         x,
         fdtype = Val(:hcentral),
         inplace = _hessian_inplace(x);
         relstep = default_relstep(fdtype, eltype(x)),
-        absstep = relstep)
+        absstep = relstep) where {FN0}
     cache = HessianCache(x, fdtype, inplace)
     finite_difference_hessian!(H, f, x, cache; relstep = relstep, absstep = absstep)
 end
@@ -199,10 +199,10 @@ end
 
 Cached.
 """
-function finite_difference_hessian!(H, f, x,
+function finite_difference_hessian!(H, f::FN0, x,
         cache::HessianCache{T, fdtype, inplace};
         relstep = default_relstep(fdtype, eltype(x)),
-        absstep = relstep) where {T, fdtype, inplace}
+        absstep = relstep) where {FN0,T, fdtype, inplace}
     @assert fdtype == Val(:hcentral)
     n = length(x)
     xpp, xpm, xmp, xmm = cache.xpp, cache.xpm, cache.xmp, cache.xmm
